@@ -1,0 +1,41 @@
+[package]
+name = "riv"
+version = "0.1.0"
+authors = ["Rafal Michalski <royaltm75@gmail.com>"]
+edition = "2018"
+publish = false
+repository = "https://github.com/royaltm/rust-royal-image-viewer"
+homepage = "https://github.com/royaltm/rust-royal-image-viewer/"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+include = ["/src/", "/README.md"]
+description = """
+Royal Image Viewer
+"""
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = "2.33.0"
+css-color-parser = "0.1.2"
+env_logger = "0.8"
+image = "0.23.12"
+log = "0.4"
+minifb = { git = "https://github.com/emoon/rust_minifb.git" }
+num-traits = "0.2"
+
+[patch.crates-io]
+xkbcommon-sys = { git = 'https://github.com/royaltm/rust-xkbcommon-sys.git' }
+
+[target.'cfg(windows)'.dependencies.winapi]
+version = "0.3"
+features = ["winuser", "winerror", "shellscalingapi"]
+# rpxc sh -c 'cd rust-images && XKBCOMMON_LIB_DIR=//rpxc/sysroot/usr/lib/arm-linux-gnueabihf cargo build'
+# //rpxc/bin/../arm-linux-gnueabihf/libc
+# RUSTFLAGS=-C link-args
+# rpxc arm-linux-gnueabihf-gcc -print-sysroot
+# /rpxc/arm-linux-gnueabihf/libc/lib/arm-linux-gnueabihf
+
+[profile.release]
+lto = true
+opt-level = 3
