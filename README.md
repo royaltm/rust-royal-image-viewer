@@ -4,7 +4,7 @@ Royal Image Viewer
 This is the image viewer we need and deserve but never have before (probably).
 
 ```
-RustImageViewer 1.0
+RoyalImageViewer 1.0
 Rafał Michalski
 
 USAGE:
