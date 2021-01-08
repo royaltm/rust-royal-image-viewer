@@ -27,22 +27,53 @@ ARGS:
 
 The image is displayed centered until the program is killed or ESC key is pressed.
 
+Compiling
+---------
+
+On Windows and OSX no extra packages are needed.
+
+On Linux:
+
+APT:
+
+* `libxkbcommon-dev`
+* `libwayland-dev`
+
+RPM:
+
+* `wayland-devel`
+* `libxkbcommon-devel`
+
+Pacman:
+
+* `wayland`
+* `libxkbcommon`
+
 
 Cross compiling
 ---------------
 
 Install Rust with [rustup](https://rustup.rs/) and all cross-compiling tools you need with systemroot.
 
+Make sure `pkgconf` package is installed in $SYSROOT.
+
+To help guide rust [pkg_config](https://crates.io/crates/pkg-config) for cross-compiling:
+
+```
+ENV TARGET_PKG_CONFIG_PATH=
+ENV TARGET_PKG_CONFIG_SYSROOT_DIR=$SYSROOT
+ENV TARGET_PKG_CONFIG_LIBDIR=$SYSROOT/usr/lib/pkgconfig:$SYSROOT/usr/share/pkgconfig:$SYSROOT/usr/lib/$ARCH/pkgconfig
+```
+
+where `$ARCH` is the linux target (e.g. `arm-linux-gnueabihf`) and `$SYSROOT` is your target system image.
+
+
 ### Raspbian
 
-Required raspbian packages in `$SYSROOT`:
+Required arm-linux-gnueabihf packages in `$SYSROOT`:
 
 * `libxkbcommon-dev`
 * `libwayland-dev`
-
-```
-export XKBCOMMON_LIB_DIR=$SYSROOT/usr/lib/arm-linux-gnueabihf
-```
 
 Add target:
 
@@ -63,12 +94,9 @@ Get exe file from `target/armv7-unknown-linux-gnueabihf/release/riv`.
 
 Packages:
 
+* pkgconf
 * xkbcommon
 * wayland
-
-```
-export XKBCOMMON_LIB_DIR=$SYSROOT/usr/lib/$arch
-```
 
 Add target:
 
