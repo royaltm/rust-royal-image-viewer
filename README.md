@@ -9,7 +9,7 @@ Rafał Michalski
 Displays a centered image in a window of a size and position of your choosing.
 
 USAGE:
-    riv.exe [FLAGS] [OPTIONS] [FILE]
+    riv [FLAGS] [OPTIONS] [FILE]
 
 FLAGS:
     -f, --fail       Exits after failing to contact the remote instance
@@ -71,6 +71,7 @@ RIV_BIND_ADDR=localhost
 RIV_TIMEOUT=2
 ```
 
+To see debug messages set `RUST_LOG=debug`.
 
 Compiling
 ---------
