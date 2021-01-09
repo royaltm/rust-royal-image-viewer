@@ -1,6 +1,5 @@
 use core::{mem, result};
 use core::convert::TryInto;
-use std::io::Write;
 use std::net::{ToSocketAddrs, SocketAddr, UdpSocket};
 use std::sync::mpsc::{channel, TryRecvError, Sender, Receiver};
 use std::thread;
@@ -203,11 +202,11 @@ impl RivPacket {
         if name.len() > MAX_NAME_LENGTH {
             return Err("name is too long to encode in a packet");
         }
-        let mut data = Vec::with_capacity(10 + name.len());
-        data.write_all(b"RIVd").unwrap();
-        data.write_all(&color.to_be_bytes()).unwrap();
-        data.write_all(&(name.len() as u16).to_be_bytes()).unwrap();
-        data.write_all(name.as_bytes()).unwrap();
+        let mut data = Vec::with_capacity(RIVOFFS_NAME + name.len());
+        data.extend_from_slice(b"RIVd");
+        data.extend_from_slice(&color.to_be_bytes());
+        data.extend_from_slice(&(name.len() as u16).to_be_bytes());
+        data.extend_from_slice(name.as_bytes());
         Ok(RivPacket { data })
     }
 
