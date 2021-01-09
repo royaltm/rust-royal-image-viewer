@@ -48,14 +48,14 @@ fn run() -> Result<()> {
                          .takes_value(true))
                 .arg(Arg::with_name("remote").short("r").long("remote").value_name("ipaddr")
                          .env("RIV_REMOTE_ADDR")
-                         .help("Remote instance IP address")
+                         .help("Remote process IP address")
                          .takes_value(true))
                 .arg(Arg::with_name("timeout").short("t").long("timeout").value_name("seconds")
                          .env("RIV_TIMEOUT")
-                         .help("Remote instance respond timeout")
+                         .help("Remote process respond timeout")
                          .takes_value(true))
                 .arg(Arg::with_name("fail").short("f").long("fail")
-                         .help("Exits after failing to contact the remote instance"))
+                         .help("Exits after failing to contact the remote process"))
                 .arg(Arg::with_name("nkey").short("K").long("no-key")
                          .help("Do not exit after pressing ESC key"))
                 .arg(Arg::with_name("FILE")
@@ -100,11 +100,11 @@ fn run() -> Result<()> {
                 Ok(())
             }
             else {
-                err_code("the remote instance failed to load the image", 2)
+                err_code("the remote process failed to load the image", 2)
             }
         }
         if fail {
-            return err_code("the remote instance failed to respond in time", 3)
+            return err_code("the remote process failed to respond in time", 3)
         }
     }
     else if fail {
