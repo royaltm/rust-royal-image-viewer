@@ -74,6 +74,16 @@ RIV_TIMEOUT=1
 
 To see debug messages set `RUST_LOG=debug`.
 
+### Exit codes
+
+The `0` exit code signals a success.
+
+Other exit codes have to following meaning:
+
+* `1` - providing valid options failed or a local image file could not be loaded.
+* `2` - the remote process failed to load an image.
+* `3` - the remote process failed to respond in time (only with `-f`).
+
 
 Compiling
 ---------
