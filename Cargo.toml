@@ -30,11 +30,6 @@ xkbcommon-sys = { git = 'https://github.com/royaltm/rust-xkbcommon-sys.git' }
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3"
 features = ["winuser", "winerror", "shellscalingapi"]
-# rpxc sh -c 'cd rust-images && XKBCOMMON_LIB_DIR=//rpxc/sysroot/usr/lib/arm-linux-gnueabihf cargo build'
-# //rpxc/bin/../arm-linux-gnueabihf/libc
-# RUSTFLAGS=-C link-args
-# rpxc arm-linux-gnueabihf-gcc -print-sysroot
-# /rpxc/arm-linux-gnueabihf/libc/lib/arm-linux-gnueabihf
 
 [profile.release]
 lto = true

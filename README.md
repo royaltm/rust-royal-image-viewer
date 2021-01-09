@@ -4,28 +4,56 @@ Royal Image Viewer
 This is the image viewer we need and deserve but never have before (probably).
 
 ```
-RoyalImageViewer 1.0
+Royal Image Viewer 2.0
 Rafał Michalski
+Displays a centered image in a window of a size and position of your choosing.
 
 USAGE:
-    riv [OPTIONS] [file]
+    riv.exe [FLAGS] [OPTIONS] [FILE]
 
 FLAGS:
+    -f, --fail       Exits after failing to contact the remote instance
         --help       Prints help information
     -V, --version    Prints version information
 
 OPTIONS:
-    -c, --color <color>      background color
-    -h, --height <height>    window height
-    -w, --width <width>      window width
-    -x, --xwin <xwin>        horizontal window position
-    -y, --ywin <ywin>        vertical window position
+    -b, --bind <ipaddr>        Specify UDP bind IP address [env: RIV_BIND_ADDR=]
+    -c, --color <css>          Window background color [env: RIV_WINDOW_COLOR=]
+    -h, --height <height>      Window height [env: RIV_WINDOW_HEIGH=]  [default: 1080]
+    -p, --port <port>          Specify UDP port [env: RIV_PORT=]  [default: 9990]
+    -r, --remote <ipaddr>      Remote instance IP address [env: RIV_REMOTE_ADDR=]
+    -t, --timeout <seconds>    Remote instance respond timeout [env: RIV_TIMEOUT=]
+    -w, --width <width>        Window width [env: RIV_WINDOW_WIDTH=]  [default: 1920]
+    -x, --xwin <xwin>          Horizontal window position [env: RIV_WINDOW_X=]
+    -y, --ywin <ywin>          Vertical window position [env: RIV_WINDOW_Y=]
 
 ARGS:
-    <file>    An image file to display
+    <FILE>    An image file to display
 ```
 
-The image is displayed centered until the program is killed or ESC key is pressed.
+The RIV window is displayed until the program is killed or ESC key is pressed.
+
+* Without a `FILE` argument, displays a window filled with a black or a provided color.
+* When called with a `FILE` argument, displays a centered image on a window with a black (or a provided color) background.
+* While displaying a window, listens to UDP commands on localhost or a provided `bind` IP address.
+* Before displaying a window, attempts to send a command to an existing instance of RIV via UDP messages to load another image and change the background color. This initial attempt can be disabled by setting `timeout` to 0.
+* Only after a failed attempt to contact another instance of RIV, its own window is displayed and the image is loaded.
+* To prevent RIV from displaying its own window at all, provide an `-f` switch.
+
+The following environment variables can be set to override defaults:
+
+```
+RIV_WINDOW_COLOR=black
+RIV_WINDOW_WIDTH=1920
+RIV_WINDOW_HEIGH=1080
+RIV_WINDOW_X=0
+RIV_WINDOW_Y=0
+RIV_PORT=9990
+RIV_REMOTE_ADDR=localhost
+RIV_BIND_ADDR=localhost
+RIV_TIMEOUT=2
+```
+
 
 Compiling
 ---------
@@ -36,8 +64,8 @@ On Linux:
 
 APT:
 
-* `libxkbcommon-dev`
 * `libwayland-dev`
+* `libxkbcommon-dev`
 
 RPM:
 
