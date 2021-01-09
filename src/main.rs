@@ -10,7 +10,7 @@ mod images;
 mod remote;
 mod utils;
 
-use utils::Result;
+use utils::{Result, ExitError, err_code};
 
 fn run() -> Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("error")).init();
@@ -56,6 +56,8 @@ fn run() -> Result<()> {
                          .takes_value(true))
                 .arg(Arg::with_name("fail").short("f").long("fail")
                          .help("Exits after failing to contact the remote instance"))
+                .arg(Arg::with_name("nkey").short("K").long("no-key")
+                         .help("Do not exit after pressing ESC key"))
                 .arg(Arg::with_name("FILE")
                                .help("An image file to display")
                                .required(false))
@@ -84,9 +86,10 @@ fn run() -> Result<()> {
     let remote = (matches.value_of("remote").unwrap_or_else(|| "localhost"), port);
     let bind = (matches.value_of("bind").unwrap_or_else(|| "localhost"), port);
     let fail = matches.is_present("fail");
+    let nkey = matches.is_present("nkey");
     let timeout: u64 = matches.value_of("timeout").map(|v| v.parse()).transpose()
-                                .map_err(|_| "timeout must be a positive integer")?
-                                .unwrap_or_else(|| if fail { 20 } else { 2 });
+                              .map_err(|_| "timeout must be a positive integer")?
+                              .unwrap_or_else(|| if fail { 5 } else { 1 });
     let opt_name = matches.value_of("FILE");
 
     // check remote if file
@@ -97,11 +100,11 @@ fn run() -> Result<()> {
                 Ok(())
             }
             else {
-                Err("the remote instance failed to load the image".into())
+                err_code("the remote instance failed to load the image", 2)
             }
         }
         if fail {
-            return Err("the remote instance failed to respond in time".into())
+            return err_code("the remote instance failed to respond in time", 3)
         }
     }
     else if fail {
@@ -135,11 +138,11 @@ fn run() -> Result<()> {
     window.set_position(xwin, ywin);
     window.set_cursor_visibility(false);
     // Limit to max ~60 fps update rate
-    window.limit_update_rate(Some(std::time::Duration::from_micros(1000_000 / 60)));
+    window.limit_update_rate(Some(std::time::Duration::from_micros(1_000_000 / 60)));
     // Draw a buffer with preloaded image
     window.update_with_buffer(&buffer, width, height)?;
 
-    while window.is_open() && !window.is_key_down(Key::Escape) {
+    while window.is_open() && (nkey || !window.is_key_down(Key::Escape)) {
         match recv.try_recv() {
             Ok((color, img)) => {
                 debug!("drawing image");
@@ -159,7 +162,12 @@ fn main() -> Result<()> {
         Ok(..) => 0,
         Err(err) => {
             eprintln!("Sorry, but {}.", err);
-            1
+            if let Some(eerr) = err.downcast_ref::<ExitError>() {
+                eerr.exit_code()
+            }
+            else {
+                1
+            }
         }
     });
 }

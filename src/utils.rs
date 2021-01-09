@@ -1,7 +1,38 @@
 #![allow(unused_imports)]
-use std::{borrow::Cow, error::Error, ptr};
+use std::{borrow::Cow, error::Error, fmt, ptr};
 
 pub type Result<T> = core::result::Result<T, Box<dyn std::error::Error>>;
+
+#[derive(Debug, Clone)]
+pub struct ExitError {
+    message: &'static str,
+    exit_code: i32
+}
+
+impl ExitError {
+    pub fn new(message: &'static str, exit_code: i32) -> Self {
+        ExitError { message, exit_code }
+    }
+}
+
+impl fmt::Display for ExitError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.message.fmt(f)
+    }
+}
+
+impl Error for ExitError {}
+
+impl ExitError {
+    pub fn exit_code(&self) -> i32 {
+        self.exit_code
+    }
+}
+
+pub fn err_code(msg: &'static str, code: i32) -> Result<()> {
+    Err(ExitError::new(msg, code).into())
+}
+
 
 #[cfg(not(windows))]
 pub fn set_dpi_awareness() -> core::result::Result<(), String> { Ok(()) }
