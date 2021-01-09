@@ -14,6 +14,7 @@ USAGE:
 FLAGS:
     -f, --fail       Exits after failing to contact the remote instance
         --help       Prints help information
+    -K, --no-key     Do not exit after pressing ESC key
     -V, --version    Prints version information
 
 OPTIONS:
@@ -31,20 +32,20 @@ ARGS:
     <FILE>    An image file to display
 ```
 
-The RIV window is displayed until the program is killed or ESC key is pressed.
+The RIV window is displayed until the program is terminated or ESC key is pressed.
 
 * Without a `FILE` argument, displays a window filled with a black or a provided `color`.
-* When called with a `FILE` argument, displays a centered image on a window with a black (or a provided `color`) background.
 * While displaying a window, listens to UDP commands on localhost or a provided `bind` IP address.
-* Before displaying a window, attempts to send a command to an existing instance of RIV via UDP messages to load another image and change the background color. This initial attempt can be disabled by setting `timeout` to 0.
-* Only after a failed attempt to contact another instance of RIV, its own window is displayed and the image is loaded.
-* To prevent RIV from displaying its own window at all, provide an `-f` switch.
+* When called with a `FILE` argument, attempts to send a command to an existing RIV process via UDP messages to load and display another image and change the background color on an already opened window.
+* After a failed attempt to contact another RIV process opens a window and displays a centered image.
+* To load and display an image immediately without attempting to contact another process set the `timeout` to 0.
+* To prevent RIV from displaying its window after a failed attempt to contact another RIV process use the `-f` switch.
 
 ### Examples
 
 ```
 # displays image.jpg on a 1920x1080 window
-# prevents contacting another instance before attempting to load an image
+# does not send a command to another instance before attempting to load an image
 # listens on 9990 UDP port for commands
 riv path/to/image.jpg -t 0
 
@@ -54,7 +55,7 @@ riv --color olive -w 800 -h 800 -p 3333 -x 100 -y 100
 
 # attempts to command another instance of RIV to show provided image on a #623 background
 # exits after 4 seconds if another instance is not up and listening on port 9990
-riv path/to/another/image.jpg -c '#623' -t 3 -f
+riv path/to/another/image.jpg -c '#623' -t 4 -f
 ```
 
 The following environment variables can be set to override defaults:
@@ -68,10 +69,11 @@ RIV_WINDOW_Y=0
 RIV_PORT=9990
 RIV_REMOTE_ADDR=localhost
 RIV_BIND_ADDR=localhost
-RIV_TIMEOUT=2
+RIV_TIMEOUT=1
 ```
 
 To see debug messages set `RUST_LOG=debug`.
+
 
 Compiling
 ---------
