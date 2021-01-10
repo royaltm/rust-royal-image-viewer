@@ -1,10 +1,11 @@
+use core::fmt::Debug;
 use core::{mem, result};
 use core::convert::TryInto;
 use std::net::{ToSocketAddrs, SocketAddr, UdpSocket};
 use std::sync::mpsc::{channel, TryRecvError, Sender, Receiver};
 use std::thread;
 use std::time::{Duration, Instant};
-use log::{debug, warn};
+use log::{Level, debug, warn, log_enabled};
 use image::RgbImage;
 
 use crate::images::load_image;
@@ -17,7 +18,31 @@ const CODE_ACK:     u8 = b'a';
 const CODE_OK:      u8 = b'o';
 const CODE_ERR:     u8 = b'e';
 
-pub fn send<A: ToSocketAddrs, B: ToSocketAddrs>(
+struct Timer {
+    start: Instant,
+    timer: Instant
+}
+
+impl Timer {
+    fn new() -> Self {
+        let start = Instant::now();
+        Timer { start, timer: start }
+    }
+
+    fn reset(&mut self) {
+        self.start = self.timer;
+    }
+
+    fn wait_if_too_fast(&mut self, min_loop_duration: Duration) {
+        let elapsed = self.timer.elapsed();
+        if elapsed < min_loop_duration {
+            thread::sleep(min_loop_duration - elapsed);
+        }
+        self.timer += min_loop_duration;
+    }
+}
+
+pub fn send<A: ToSocketAddrs + Debug, B: ToSocketAddrs>(
         remote: A,
         local: B,
         timeout: Duration,
@@ -31,38 +56,41 @@ pub fn send<A: ToSocketAddrs, B: ToSocketAddrs>(
 
     const MIN_LOOP_DURATION: Duration = Duration::from_millis(250);
     let socket = UdpSocket::bind(local)?;
-    debug!("local {:?}", socket.local_addr());
+    if log_enabled!(Level::Debug) {
+        debug!("local {:?}", socket.local_addr()?);
+        for addr in remote.to_socket_addrs()? {
+            debug!("remote {:?}", addr);
+        }
+    }
     socket.connect(remote)?;
     socket.set_read_timeout(Some(MIN_LOOP_DURATION))?;
     let msg = RivPacket::new(color, name)?.into_inner();
     let mut buf = [0; MAX_PACKET_SIZE];
-    let mut start = Instant::now();
-    let mut timer = start;
-    while timer.duration_since(start) < timeout {
-        let now = Instant::now();
-        let prev_duration = now.duration_since(timer);
-        if prev_duration < MIN_LOOP_DURATION {
-            thread::sleep(MIN_LOOP_DURATION - prev_duration);
-        }
-        timer = now;
+    let mut timer = Timer::new();
+
+    while timer.timer.duration_since(timer.start) < timeout {
         let _ = socket.send(&msg);
         let packet = match socket.recv(&mut buf) {
             Ok(amt) => match RivPacket::from(&buf[0..amt]) {
-                Ok(packet) if packet.color() == color &&
+                Ok(packet) if !packet.is_display() &&
+                              packet.color() == color &&
                               packet.name() == name => packet,
                 _ => {
                     debug!("recv invalid response");
                     continue
                 }
             }
-            _ => continue
+            _ => {
+                timer.wait_if_too_fast(MIN_LOOP_DURATION);
+                continue
+            }
         };
         if packet.is_ack() {
             debug!("recv ack");
-            start = Instant::now();
-            timer = start;
+            timer.wait_if_too_fast(MIN_LOOP_DURATION);
+            timer.reset();
         }
-        else if packet.is_response() {
+        else {
             debug!("recv resp {}", packet.is_ok());
             return Ok(Some(packet.is_ok()))
         }
@@ -84,7 +112,7 @@ pub fn bind<A: ToSocketAddrs>(
     let socket = UdpSocket::bind(address)?;
     socket.set_read_timeout(Some(Duration::from_millis(50)))?;
     socket.set_write_timeout(Some(Duration::from_millis(250)))?;
-    debug!("bind {:?}", socket.local_addr());
+    debug!("bind {:?}", socket.local_addr()?);
 
     // network service
     thread::spawn(move || {
@@ -254,15 +282,6 @@ impl RivPacket {
 
     pub fn is_ack(&self) -> bool {
         self.code() == CODE_ACK
-    }
-
-    pub fn is_response(&self) -> bool {
-        if let CODE_OK|CODE_ERR = self.code() {
-            true
-        }
-        else {
-            false
-        }
     }
 
     pub fn is_ok(&self) -> bool {
