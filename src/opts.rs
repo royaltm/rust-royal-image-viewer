@@ -5,6 +5,8 @@ use crate::images;
 use crate::utils::Result;
 
 const DEFAULT_ADDRESS: &str = "localhost";
+// only if remote is not localhost
+const PUBLIC_BIND_ADDRESS: &str = "0.0.0.0";
 
 pub trait AppArgs {
     fn app_args(self) -> Self;
@@ -85,6 +87,7 @@ pub struct Config<'a> {
 
 impl<'a> Config<'a> {
     pub fn new<'b: 'a>(matches: &'b clap::ArgMatches<'a>) -> Result<Config<'a>> {
+        let remote = matches.value_of("remote").unwrap_or(DEFAULT_ADDRESS);
         let fail = matches.is_present("fail");
         Ok(Config {
             width: matches.value_of("width").map(|v| v.parse()).transpose()
@@ -107,8 +110,13 @@ impl<'a> Config<'a> {
             port: matches.value_of("port").map(|v| v.parse()).transpose()
                                .map_err(|_| "port must be an integer: 0 - 65535")?
                                .unwrap(),
-            remote: matches.value_of("remote").unwrap_or_else(|| DEFAULT_ADDRESS),
-            bind: matches.value_of("bind").unwrap_or_else(|| DEFAULT_ADDRESS),
+            remote,
+            bind: matches.value_of("bind").unwrap_or_else(|| if remote == DEFAULT_ADDRESS {
+                DEFAULT_ADDRESS
+            }
+            else {
+                PUBLIC_BIND_ADDRESS
+            }),
             fail,
             nkey: matches.is_present("nkey"),
             detach: matches.is_present("detach"),
