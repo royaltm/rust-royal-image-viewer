@@ -15,6 +15,7 @@ FLAGS:
     -d, --detach     Run window process in the background and print its PID
     -f, --fail       Exits after failing to contact the remote process
         --help       Prints help information
+    -i, --info       Prints information about the image
     -K, --no-key     Do not exit after pressing ESC key
     -V, --version    Prints version information
 

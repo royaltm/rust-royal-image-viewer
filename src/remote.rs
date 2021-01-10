@@ -73,7 +73,8 @@ pub fn send<A: ToSocketAddrs, B: ToSocketAddrs>(
 pub fn bind<A: ToSocketAddrs>(
         address: A,
         buf_width: u32,
-        buf_height: u32
+        buf_height: u32,
+        with_info: bool
     ) -> std::io::Result<Receiver<(u32, RgbImage)>>
 {
     let (main_send, main_recv) = channel();
@@ -150,7 +151,7 @@ pub fn bind<A: ToSocketAddrs>(
     // image loader
     let load_for = move |mut packet: RivPacket, addr| -> Result<()> {
         let name = packet.name();
-        match load_image(&name, buf_width, buf_height) {
+        match load_image(&name, buf_width, buf_height, with_info) {
             Ok(img) => {
                 // send to main to show it
                 main_send.send((packet.color(), img))?;

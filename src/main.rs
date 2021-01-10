@@ -32,6 +32,7 @@ fn run() -> Result<()> {
     let Config { opt_name, color, width, height, .. } = cfg;
 
     debug!("{:?}", cfg);
+
     if cfg.mswin_free_console {
         utils::free_console_window();
     }
@@ -67,11 +68,12 @@ fn run() -> Result<()> {
     let mut buffer: Vec<u32> = vec![color; width * height];
 
     // bind socket
-    let recv = remote::bind((cfg.bind, cfg.port), width as u32, height as u32)?;
+    let recv = remote::bind((cfg.bind, cfg.port), width as u32, height as u32, cfg.info)?;
 
     // load image if file
     if let Some(name) = opt_name {
-        images::load_image_center_into(name, color, width as u32, height as u32, buffer.as_mut())?;
+        images::load_image_center_into(
+            name, color, width as u32, height as u32, buffer.as_mut(), cfg.info)?;
     }
 
     // open window

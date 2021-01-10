@@ -54,6 +54,8 @@ impl<'a, 'b> AppArgs for clap::App<'a, 'b> {
             .help("Run window process in the background and print its PID"))
         .arg(Arg::with_name("nkey").short("K").long("no-key")
             .help("Do not exit after pressing ESC key"))
+        .arg(Arg::with_name("info").short("i").long("info")
+            .help("Prints information about the image"))
         .arg(Arg::with_name("mswinfreecons").long("mswin-free-console")
             .hidden(true))
         .arg(Arg::with_name("FILE")
@@ -77,6 +79,7 @@ pub struct Config<'a> {
     pub nkey: bool,
     pub fail: bool,
     pub detach: bool,
+    pub info: bool,
     pub mswin_free_console: bool,
 }
 
@@ -109,6 +112,7 @@ impl<'a> Config<'a> {
             fail,
             nkey: matches.is_present("nkey"),
             detach: matches.is_present("detach"),
+            info: matches.is_present("info"),
             mswin_free_console: matches.is_present("mswinfreecons"),
             timeout: matches.value_of("timeout").map(|v| v.parse()).transpose()
                                       .map_err(|_| "timeout must be a positive integer")?
@@ -156,6 +160,9 @@ impl ArgsFrom for Command {
         }
         if opts.detach {
             self.arg("-d");
+        }
+        if opts.info {
+            self.arg("-i");
         }
         #[cfg(windows)]
         if opts.mswin_free_console {
