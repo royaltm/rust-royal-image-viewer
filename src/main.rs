@@ -18,7 +18,7 @@ fn run() -> Result<()> {
     env_logger::Builder::from_env(Env::default().default_filter_or("error")).init();
 
     let matches = clap::App::new("Royal Image Viewer")
-        .version("2.0")
+        .version(env!("CARGO_PKG_VERSION"))
         .author("Rafał Michalski")
         .about("Displays a centered image in a window of a size and position of your choosing.")
         .app_args()

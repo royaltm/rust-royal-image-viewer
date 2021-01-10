@@ -4,7 +4,7 @@ Royal Image Viewer
 This is the image viewer we need and deserve but never have before (probably).
 
 ```
-Royal Image Viewer 2.0
+Royal Image Viewer 2.0.0
 Rafał Michalski
 Displays a centered image in a window of a size and position of your choosing.
 
