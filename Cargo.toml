@@ -24,12 +24,9 @@ log = "0.4"
 minifb = { git = "https://github.com/emoon/rust_minifb.git" }
 num-traits = "0.2"
 
-[patch.crates-io]
-xkbcommon-sys = { git = 'https://github.com/royaltm/rust-xkbcommon-sys.git' }
-
 [target.'cfg(windows)'.dependencies.winapi]
 version = "0.3"
-features = ["winuser", "winerror", "shellscalingapi"]
+features = ["winuser", "winerror", "shellscalingapi", "wincon"]
 
 [profile.release]
 lto = true

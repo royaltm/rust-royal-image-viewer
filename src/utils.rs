@@ -55,3 +55,36 @@ pub fn set_dpi_awareness() -> core::result::Result<(), String> {
         },
     }
 }
+
+#[cfg(not(windows))]
+pub fn free_console_window() {}
+
+#[cfg(windows)]
+pub fn free_console_window() {
+    unsafe { winapi::um::wincon::FreeConsole() };
+}
+
+// #[cfg(not(windows))]
+// pub fn attach_console_window() {}
+
+// #[cfg(windows)]
+// pub fn attach_console_window() {
+//     use winapi::um::wincon;
+//     unsafe { wincon::AttachConsole(wincon::ATTACH_PARENT_PROCESS) };
+// }
+
+// #[cfg(not(windows))]
+// pub fn hide_console_window() {}
+
+// #[cfg(windows)]
+// pub fn hide_console_window() {
+//     use winapi::um::{wincon::GetConsoleWindow, winuser::{ShowWindow, SW_HIDE}};
+
+//     let window = unsafe { GetConsoleWindow() };
+//     // https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-showwindow
+//     if window != std::ptr::null_mut() {
+//         unsafe {
+//             ShowWindow(window, SW_HIDE);
+//         }
+//     }
+// }

@@ -12,7 +12,8 @@ USAGE:
     riv [FLAGS] [OPTIONS] [FILE]
 
 FLAGS:
-    -f, --fail       Exits after failing to contact the remote instance
+    -d, --detach     Run window process in the background and print its PID
+    -f, --fail       Exits after failing to contact the remote process
         --help       Prints help information
     -K, --no-key     Do not exit after pressing ESC key
     -V, --version    Prints version information
@@ -22,8 +23,8 @@ OPTIONS:
     -c, --color <css>          Window background color [env: RIV_WINDOW_COLOR=]
     -h, --height <height>      Window height [env: RIV_WINDOW_HEIGH=]  [default: 1080]
     -p, --port <port>          Specify UDP port [env: RIV_PORT=]  [default: 9990]
-    -r, --remote <ipaddr>      Remote instance IP address [env: RIV_REMOTE_ADDR=]
-    -t, --timeout <seconds>    Remote instance respond timeout [env: RIV_TIMEOUT=]
+    -r, --remote <ipaddr>      Remote process IP address [env: RIV_REMOTE_ADDR=]
+    -t, --timeout <seconds>    Remote process respond timeout [env: RIV_TIMEOUT=]
     -w, --width <width>        Window width [env: RIV_WINDOW_WIDTH=]  [default: 1920]
     -x, --xwin <xwin>          Horizontal window position [env: RIV_WINDOW_X=]
     -y, --ywin <ywin>          Vertical window position [env: RIV_WINDOW_Y=]
@@ -34,12 +35,17 @@ ARGS:
 
 The RIV window is displayed until the program is terminated or ESC key is pressed.
 
-* Without a `FILE` argument, displays a window filled with a black or a provided `color`.
-* While displaying a window, listens to UDP commands on localhost or a provided `bind` IP address.
-* When called with a `FILE` argument, attempts to send a command to an existing RIV process via UDP messages to load and display another image and change the background color on an already opened window.
-* After a failed attempt to contact another RIV process opens a window and displays a centered image.
-* To load and display an image immediately without attempting to contact another process set the `timeout` to 0.
-* To prevent RIV from displaying its window after a failed attempt to contact another RIV process use the `-f` switch.
+When the window is up RIV acts as a server and listens on a UDP socket for commands.
+
+Before doing so, RIV sends a command to the UDP socket to load an image into an existing window.
+A new window appears only if the server doesn't respond within the timeout.
+
+* To disable sending a command at all, set the timeout to 0.
+
+* To prevent RIV from opening a window at all use the `-f` switch.
+
+* To run a window process in the background use the `-d` switch.
+
 
 ### Examples
 
@@ -49,12 +55,12 @@ The RIV window is displayed until the program is terminated or ESC key is presse
 # listens on 9990 UDP port for commands
 riv path/to/image.jpg -t 0
 
-# opens 800x800 window positioned at 100x100, with olive background
-# listens on 3333 UDP port for commands
-riv --color olive -w 800 -h 800 -p 3333 -x 100 -y 100
+# runs in the background, opens an 800x800 window positioned at 100x100 with olive background
+# listens on UDP port 3333 for commands
+riv -c olive -w 800 -h 800 -p 3333 -x 100 -y 100 -d
 
-# attempts to command another instance of RIV to show provided image on a #623 background
-# exits after 4 seconds if another instance is not up and listening on port 9990
+# attempts to command another RIV to show provided image on a #623 background
+# exits after 4 seconds if RIV server is not up and listening on port 9990
 riv path/to/another/image.jpg -c '#623' -t 4 -f
 ```
 
@@ -80,7 +86,7 @@ The `0` exit code signals a success.
 
 Other exit codes have to following meaning:
 
-* `1` - providing valid options failed or a local image file could not be loaded.
+* `1` - parsing options failed or a an image file could not be loaded locally.
 * `2` - the remote process failed to load an image.
 * `3` - the remote process failed to respond in time (only with `-f`).
 
