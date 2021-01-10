@@ -85,7 +85,7 @@ To see debug messages set `RUST_LOG=debug`.
 
 The `0` exit code signals a success.
 
-Other exit codes have to following meaning:
+Other exit codes have the following meaning:
 
 * `1` - parsing options failed or a an image file could not be loaded locally.
 * `2` - the remote process failed to load an image.
