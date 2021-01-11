@@ -29,7 +29,7 @@ fn run() -> Result<()> {
             within the timeout. To disable sending a command at all, set the timeout to 0.")
         .get_matches();
     let cfg = Config::new(&matches)?;
-    let Config { opt_name, color, width, height, .. } = cfg;
+    let Config { name, color, width, height, .. } = cfg;
 
     debug!("{:?}", cfg);
 
@@ -37,25 +37,21 @@ fn run() -> Result<()> {
         utils::free_console_window();
     }
 
-    // check remote if file
-    if let Some(name) = opt_name {
-        let timeout = Duration::from_secs(cfg.timeout);
-        if let Some(res) = remote::send((cfg.remote, cfg.port),
-                                        (cfg.bind, 0),
-                                        timeout, cfg.color, name)? {
-            return if res {
-                Ok(())
-            }
-            else {
-                err_code("the remote process failed to load the image", 2)
-            }
+    // check remote
+    let timeout = Duration::from_secs(cfg.timeout);
+    if let Some(res) = remote::send((cfg.remote, cfg.port),
+                                    (cfg.bind, 0),
+                                    timeout, color, name)? {
+        return if res {
+            Ok(())
         }
-        if cfg.fail {
-            return err_code("the remote process failed to respond in time", 3)
+        else {
+            err_code("the remote process failed to load the image", 2)
         }
     }
-    else if cfg.fail {
-        return Err("no image file name was specified".into())
+
+    if cfg.fail {
+        return err_code("the remote process failed to respond in time", 3)
     }
 
     if cfg.detach {
@@ -71,7 +67,7 @@ fn run() -> Result<()> {
     let recv = remote::bind((cfg.bind, cfg.port), width as u32, height as u32, cfg.info)?;
 
     // load image if file
-    if let Some(name) = opt_name {
+    if !name.is_empty() {
         images::load_image_center_into(
             name, color, width as u32, height as u32, buffer.as_mut(), cfg.info)?;
     }
@@ -98,9 +94,17 @@ fn run() -> Result<()> {
 
     while window.is_open() && (cfg.nkey || !window.is_key_down(Key::Escape)) {
         match recv.try_recv() {
-            Ok((color, img)) => {
-                debug!("drawing image with: {:06x}", color);
-                images::center_image_into(&img, color, width as u32, height as u32, &mut buffer);
+            Ok((color, maybeimg)) => {
+                if let Some(img) = maybeimg {
+                    debug!("drawing image with: #{:06x}", color);
+                    images::center_image_into(&img, color, width as u32, height as u32, &mut buffer);
+                }
+                else {
+                    debug!("drawing color: #{:06x}", color);
+                    for p in buffer.iter_mut() {
+                        *p = color;
+                    }
+                }
                 window.update_with_buffer(&buffer, width, height)?;
             }
             Err(TryRecvError::Empty) => window.update(),

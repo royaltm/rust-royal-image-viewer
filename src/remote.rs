@@ -103,7 +103,7 @@ pub fn bind<A: ToSocketAddrs>(
         buf_width: u32,
         buf_height: u32,
         with_info: bool
-    ) -> std::io::Result<Receiver<(u32, RgbImage)>>
+    ) -> std::io::Result<Receiver<(u32, Option<RgbImage>)>>
 {
     let (main_send, main_recv) = channel();
     let (work_send, work_recv) = channel();
@@ -179,15 +179,22 @@ pub fn bind<A: ToSocketAddrs>(
     // image loader
     let load_for = move |mut packet: RivPacket, addr| -> Result<()> {
         let name = packet.name();
-        match load_image(&name, buf_width, buf_height, with_info) {
-            Ok(img) => {
-                // send to main to show it
-                main_send.send((packet.color(), img))?;
-                packet.set_code(CODE_OK);
-            }
-            Err(err) => {
-                warn!("loading image failed: {}", err);
-                packet.set_code(CODE_ERR);
+        if name.is_empty() {
+            main_send.send((packet.color(), None))?;
+            packet.set_code(CODE_OK);
+        }
+        else {
+            debug!("loading: {}", name);
+            match load_image(&name, buf_width, buf_height, with_info) {
+                Ok(img) => {
+                    // send to main to show it
+                    main_send.send((packet.color(), Some(img)))?;
+                    packet.set_code(CODE_OK);
+                }
+                Err(err) => {
+                    warn!("loading image failed: {}", err);
+                    packet.set_code(CODE_ERR);
+                }
             }
         }
         // respond to network service
@@ -198,7 +205,6 @@ pub fn bind<A: ToSocketAddrs>(
     // image load worker
     thread::spawn(move || {
         for (packet, addr) in work_recv.iter() {
-            debug!("loading: {}", packet.name());
             if load_for(packet, addr).is_err() {
                 break
             }

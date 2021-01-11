@@ -68,7 +68,7 @@ impl<'a, 'b> AppArgs for clap::App<'a, 'b> {
 
 #[derive(Debug, Clone, Copy)]
 pub struct Config<'a> {
-    pub opt_name: Option<&'a str>,
+    pub name: &'a str,
     pub xwin: isize,
     pub ywin: isize,
     pub height: usize,
@@ -125,7 +125,7 @@ impl<'a> Config<'a> {
             timeout: matches.value_of("timeout").map(|v| v.parse()).transpose()
                                       .map_err(|_| "timeout must be a positive integer")?
                                       .unwrap_or_else(|| if fail { 5 } else { 1 }),
-            opt_name: matches.value_of("FILE")
+            name: matches.value_of("FILE").unwrap_or("")
         })
     }
 }
@@ -176,8 +176,8 @@ impl ArgsFrom for Command {
         if opts.mswin_free_console {
             self.arg("--mswin-free-console");
         }
-        if let Some(name) = opts.opt_name {
-            self.arg(name);
+        if !opts.name.is_empty() {
+            self.arg(opts.name);
         }
         self
     }
