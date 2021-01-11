@@ -401,9 +401,9 @@ dependencies = [
 
 [[package]]
 name = "log"
-version = "0.4.11"
+version = "0.4.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b"
+checksum = "fcf3805d4480bb5b86070dcfeb9e2cb2ebc148adb753c5cca5f884d1d65a42b2"
 dependencies = [
  "cfg-if 0.1.10",
 ]
@@ -564,7 +564,7 @@ checksum = "ee68c3c79e81d82127e0870f94479675774d34c7ad5b55eecb9c320ef9701187"
 dependencies = [
  "libc",
  "raw-window-handle",
- "redox_syscall 0.2.2",
+ "redox_syscall 0.2.4",
  "sdl2",
  "sdl2-sys",
 ]
@@ -700,9 +700,9 @@ checksum = "41cc0f7e4d5d4544e8861606a285bb08d3e70712ccc7d2b84d7c0ccfaf4b05ce"
 
 [[package]]
 name = "redox_syscall"
-version = "0.2.2"
+version = "0.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3d82a0e6791428b9525c116cc671feac3ce1e73b26c5724a6bf26ae130ebf18"
+checksum = "05ec8ca9416c5ea37062b502703cd7fcb207736bc294f6e0cf367ac6fc234570"
 dependencies = [
  "bitflags",
 ]
@@ -736,7 +736,7 @@ dependencies = [
 
 [[package]]
 name = "riv"
-version = "2.0.1"
+version = "2.1.0"
 dependencies = [
  "clap",
  "css-color-parser",
