@@ -152,7 +152,7 @@ impl ArgsFrom for Command {
             arg_val("-y", &opts.ywin.to_string());
         }
         if opts.color != 0 {
-            arg_val("-c", &format!("{:06x}", opts.color));
+            arg_val("-c", &format!("#{:06x}", opts.color));
         }
         if opts.remote != DEFAULT_ADDRESS {
             arg_val("-r", opts.remote);
