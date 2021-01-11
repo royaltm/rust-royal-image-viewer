@@ -58,7 +58,7 @@ riv path/to/image.jpg -t 0
 
 # runs in the background, opens an 800x800 window positioned at 100x100 with olive background
 # listens on UDP port 3333 for commands
-riv -c olive -w 800 -h 800 -p 3333 -x 100 -y 100 -d
+riv -c olive -w 800 -h 800 -p 3333 -x 100 -y 100 -t 0 -d
 
 # attempts to command another RIV to show provided image on a #623 background
 # exits after 4 seconds if RIV server is not up and listening on port 9990
