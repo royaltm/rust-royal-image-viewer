@@ -77,7 +77,7 @@ pub fn send<A: ToSocketAddrs + Debug, B: ToSocketAddrs>(
                               packet.name() == name => packet,
                 _ => {
                     debug!("recv invalid response");
-                    continue
+                    break // not our service or it malfunctions
                 }
             }
             _ => {
