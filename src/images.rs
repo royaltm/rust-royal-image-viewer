@@ -1,6 +1,6 @@
 use std::path::Path;
 use log::debug;
-use image::{io::Reader as ImageReader, GenericImageView, Pixel, ColorType, RgbImage};
+use image::{io::Reader as ImageReader, GenericImageView, Pixel, ColorType, RgbImage, PixelWithColorType};
 use num_traits::cast::ToPrimitive;
 
 use crate::utils::Result;
@@ -114,10 +114,9 @@ trait IntoRgb32: Pixel {
     fn into_rgb32(self) -> Option<u32>;
 }
 
-impl<P> IntoRgb32 for P where P: Pixel, <P as Pixel>::Subpixel: 'static {
+impl<P> IntoRgb32 for P where P: Pixel + PixelWithColorType, image::Rgb<<P as Pixel>::Subpixel>: Pixel {
     fn into_rgb32(self) -> Option<u32> {
         let (r, g, b) = match P::COLOR_TYPE {
-            ColorType::Bgr8|ColorType::Bgra8|
             ColorType::L8|ColorType::La8|
             ColorType::Rgb8|ColorType::Rgba8 => {
                 if let &[r, g, b] = self.to_rgb().channels() {
